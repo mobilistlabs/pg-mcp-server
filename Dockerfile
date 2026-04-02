@@ -10,8 +10,9 @@ ADD https://astral.sh/uv/install.sh /uv-installer.sh
 # Run the installer then remove it
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
-# Ensure the installed binary is on the `PATH`
-ENV PATH="/root/.local/bin/:$PATH"
+# Move uv to a global path accessible by all users
+RUN mv /root/.local/bin/uv /usr/local/bin/uv \
+    && mv /root/.local/bin/uvx /usr/local/bin/uvx
 
 # Copy the project into the image
 ADD . /app
