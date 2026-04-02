@@ -92,7 +92,8 @@ async def execute_query(query: str, conn_id: str, params=None, ctx=Context):
     if not db:
         raise ValueError("Database connection not available in MCP state.")
 
-    logger.info(f"Executing query on connection ID {conn_id}: {query}")
+    logger.info(f"Executing query on connection ID {conn_id}")
+    logger.debug(f"Query text: {query}")
 
     async with db.get_connection(conn_id) as conn:
         # Ensure we're in read-only mode

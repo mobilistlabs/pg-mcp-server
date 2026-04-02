@@ -3,7 +3,7 @@ import os
 from server.logging_config import configure_logging, get_logger, configure_uvicorn_logging
 
 # Configure logging first thing to capture all subsequent log messages
-log_level = os.environ.get("LOG_LEVEL", "DEBUG")
+log_level = os.environ.get("LOG_LEVEL", "INFO")
 configure_logging(level=log_level)
 logger = get_logger("app")
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # Use our configured log level for Uvicorn
     uvicorn.run(
         app, 
-        host="0.0.0.0", 
+        host="127.0.0.1",
         port=8000, 
         log_level=log_level.lower(),
         log_config=uvicorn_log_config

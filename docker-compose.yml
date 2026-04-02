@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile
     container_name: pg-mcp
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
-      - LOG_LEVEL=DEBUG
+      - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
     volumes:
       # For development: mount app directory to enable hot-reloading
