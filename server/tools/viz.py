@@ -5,6 +5,7 @@ from decimal import Decimal
 from sqlglot import parse_one, exp
 from server.config import mcp
 from server.logging_config import get_logger
+from server.tools.query import validate_read_only
 
 logger = get_logger("pg-mcp.tools.viz")
 
@@ -37,7 +38,10 @@ async def get_query_metadata(conn_id, sql_query):
     """
     # Get database from mcp state
     db = mcp.state["db"]
-    
+
+    # Validate that the query is read-only
+    validate_read_only(sql_query)
+
     # Sanitize SQL - remove trailing semicolon
     sql_query = sql_query.strip()
     if sql_query.endswith(';'):
@@ -68,25 +72,28 @@ async def get_query_metadata(conn_id, sql_query):
         for col in column_attrs:
             logical_type = pg_type_to_logical(col.type)
             field_meta = {"name": col.name, "type": logical_type}
-    
+
+            # Sanitize column name for safe SQL interpolation
+            safe_col = await conn.fetchval("SELECT quote_ident($1)", col.name)
+
             # Optional: try to get stats
             if logical_type == "nominal":
-                query = f"SELECT COUNT(DISTINCT {col.name}) FROM ({sql_query}) AS subq"
+                query = f"SELECT COUNT(DISTINCT {safe_col}) FROM ({sql_query}) AS subq"
                 try:
                     result = await conn.fetchval(query)
                     field_meta["unique"] = result
                 except Exception:
                     pass
-    
+
             elif logical_type == "temporal":
-                query = f"SELECT MIN({col.name}), MAX({col.name}) FROM ({sql_query}) AS subq"
+                query = f"SELECT MIN({safe_col}), MAX({safe_col}) FROM ({sql_query}) AS subq"
                 try:
                     result = await conn.fetchrow(query)
                     if result:
                         field_meta["range"] = [result[0], result[1]]
                 except Exception:
                     pass
-    
+
             metadata["fields"].append(field_meta)
     
         # --- Row count ---
