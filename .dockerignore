@@ -1,0 +1,10 @@
+.git
+.env
+.DS_Store
+__pycache__
+*.pyc
+example-clients/
+test.py
+get_schema.py
+databases.json
+logs/

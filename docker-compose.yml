@@ -11,9 +11,6 @@ services:
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
-    volumes:
-      # For development: mount app directory to enable hot-reloading
-      - ./server:/app/server
     restart: unless-stopped
     networks:
       - pg-mcp-network

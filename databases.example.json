@@ -1,0 +1,12 @@
+{
+  "databases": [
+    {
+      "name": "crm",
+      "url": "postgresql://user:pass@host:5432/crmdb"
+    },
+    {
+      "name": "billing",
+      "url": "postgresql://user:pass@host:5432/billingdb"
+    }
+  ]
+}

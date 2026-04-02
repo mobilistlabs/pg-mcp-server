@@ -20,5 +20,11 @@ ADD . /app
 WORKDIR /app
 RUN uv sync --frozen
 
+# Create non-root user and set ownership
+RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
 # Run the application
 CMD ["uv", "run", "-m", "server.app"]
