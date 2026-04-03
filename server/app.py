@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # Use our configured log level for Uvicorn
     uvicorn.run(
         app, 
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000, 
         log_level=log_level.lower(),
         log_config=uvicorn_log_config
