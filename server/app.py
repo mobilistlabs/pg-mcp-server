@@ -32,6 +32,30 @@ register_natural_language_prompts()  # Natural language to SQL prompts
 register_data_visualization_prompts() # Data visualization prompts
 
 
+def register_env_connections():
+    """Auto-register PostgreSQL connections from DATABASE_URL and POSTGRES_*_URL env vars."""
+    registered = []
+
+    primary = os.environ.get("DATABASE_URL")
+    if primary:
+        registered.append(("DATABASE_URL", global_db.register_connection(primary)))
+
+    for key, value in sorted(os.environ.items()):
+        if key == "DATABASE_URL":
+            continue
+        if key.startswith("POSTGRES_") and key.endswith("_URL") and value:
+            registered.append((key, global_db.register_connection(value)))
+
+    for label, conn_id in registered:
+        logger.info(f"Auto-registered connection from {label}: {conn_id}")
+
+    if not registered:
+        logger.info("No DATABASE_URL or POSTGRES_*_URL env vars found; clients must register connections at runtime")
+
+
+register_env_connections()
+
+
 from contextlib import asynccontextmanager
 from starlette.applications import Starlette
 from starlette.routing import Mount
