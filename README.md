@@ -62,14 +62,49 @@ Additional extensions can be easily added via YAML config files.
 
 ### Using Docker
 
+Pull and run the image from Docker Hub:
+
 ```bash
-# Clone the repository
-git clone https://github.com/stuzero/pg-mcp-server.git
+docker run -d --name pg-mcp -p 8000:8000 \
+  -e DATABASE_URL=postgresql://user:pass@host:5432/mydb \
+  ufuf/pg-mcp:latest
+```
+
+The server is then reachable at `http://localhost:8000/sse`.
+
+#### Connection environment variables
+
+On startup the server auto-registers every PostgreSQL connection it finds in the environment. You can pass connections in two ways (mix freely):
+
+| Variable                       | Purpose                                            |
+| ------------------------------ | -------------------------------------------------- |
+| `DATABASE_URL`                 | Primary / default connection                       |
+| `POSTGRES_<NAME>_URL`          | Any number of additional named connections         |
+
+Examples:
+
+```bash
+DATABASE_URL=postgresql://user:pass@host:5432/mydb
+POSTGRES_BILLING_URL=postgresql://user:pass@host:5432/billing
+POSTGRES_ANALYTICS_URL=postgresql://user:pass@host:5432/analytics
+```
+
+Each variable is registered with the global database manager and a connection UUID is logged at startup — clients use that UUID for subsequent queries. If none of these variables are set, the server still starts but clients must register a connection at runtime via the MCP `connect` tool, and a prominent warning is printed to the logs.
+
+#### Docker Compose
+
+```bash
+git clone https://github.com/mobilistlabs/pg-mcp-server.git
 cd pg-mcp-server
 
-# Build and run with Docker Compose
-docker-compose up -d
+# Put your DATABASE_URL / POSTGRES_*_URL values in a .env file
+cp .env.example .env
+$EDITOR .env
+
+docker compose up -d
 ```
+
+`docker-compose.yml` reads the `.env` file automatically. Logs (`docker logs pg-mcp`) will show one `Auto-registered connection from <VAR>: <uuid>` line per detected variable.
 
 ### Manual Installation
 

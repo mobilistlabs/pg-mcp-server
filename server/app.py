@@ -1,5 +1,6 @@
 # server/app.py
 import os
+import sys
 from server.logging_config import configure_logging, get_logger, configure_uvicorn_logging
 
 # Configure logging first thing to capture all subsequent log messages
@@ -50,7 +51,28 @@ def register_env_connections():
         logger.info(f"Auto-registered connection from {label}: {conn_id}")
 
     if not registered:
-        logger.info("No DATABASE_URL or POSTGRES_*_URL env vars found; clients must register connections at runtime")
+        bar = "=" * 78
+        banner = (
+            "\n" + bar + "\n"
+            "  WARNING: no PostgreSQL connection env vars found.\n"
+            "\n"
+            "  Set DATABASE_URL (and optionally POSTGRES_<NAME>_URL for extra DBs)\n"
+            "  so the server can auto-register connections at startup. Examples:\n"
+            "\n"
+            "    docker run -p 8000:8000 \\\n"
+            "      -e DATABASE_URL=postgresql://user:pass@host:5432/mydb \\\n"
+            "      -e POSTGRES_BILLING_URL=postgresql://user:pass@host:5432/billing \\\n"
+            "      ufuf/pg-mcp:latest\n"
+            "\n"
+            "  Or with docker compose, put the same vars in a .env file next to\n"
+            "  docker-compose.yml.\n"
+            "\n"
+            "  Without these, the server will still start but clients must call the\n"
+            "  MCP 'connect' tool with a connection string before any query works.\n"
+            + bar + "\n"
+        )
+        print(banner, file=sys.stderr, flush=True)
+        logger.warning("No PostgreSQL connection env vars found; see banner above")
 
 
 register_env_connections()
