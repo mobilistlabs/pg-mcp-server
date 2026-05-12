@@ -74,20 +74,13 @@ The server is then reachable at `http://localhost:8000/sse`.
 
 #### Connection environment variables
 
-On startup the server auto-registers every PostgreSQL connection it finds in the environment. You can pass connections in two ways (mix freely):
-
-| Variable                       | Purpose                                            |
-| ------------------------------ | -------------------------------------------------- |
-| `DATABASE_URL`                 | Primary / default connection                       |
-| `POSTGRES_<NAME>_URL`          | Any number of additional named connections         |
-
-Examples:
+On startup the server auto-registers every PostgreSQL connection it finds in the environment. The primary variable is:
 
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/mydb
-POSTGRES_BILLING_URL=postgresql://user:pass@host:5432/billing
-POSTGRES_ANALYTICS_URL=postgresql://user:pass@host:5432/analytics
 ```
+
+If you need more than one database, add any number of `POSTGRES_<NAME>_URL` variables alongside it — the `<NAME>` part is free-form and only used as a label in the startup log.
 
 Each variable is registered with the global database manager and a connection UUID is logged at startup — clients use that UUID for subsequent queries. If none of these variables are set, the server still starts but clients must register a connection at runtime via the MCP `connect` tool, and a prominent warning is printed to the logs.
 
