@@ -2,7 +2,9 @@
 FROM python:3.13-slim
 
 # The installer requires curl (and certificates) to download the release archive
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates tzdata \
+    && ln -snf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime \
+    && echo "Europe/Istanbul" > /etc/timezone
 
 # Download the latest uv installer
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
@@ -19,7 +21,7 @@ ADD . /app
 
 # Sync the project into a new environment, using the frozen lockfile
 WORKDIR /app
-RUN uv sync --frozen
+RUN uv lock && uv sync --frozen
 
 # Create non-root user and set ownership
 RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser \
